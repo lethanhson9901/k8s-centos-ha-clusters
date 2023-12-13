@@ -80,12 +80,17 @@
 
     - name: Install Docker dependencies
       yum:
-        name: yum-utils device-mapper-persistent-data lvm2
+        name: 
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
         state: present
 
     - name: Install Docker packages
       yum:
-        name: "/tmp/docker-ce-selinux-{{ download_selinux.checksum }}.noarch.rpm,/tmp/docker-ce-{{ download_docker.checksum }}.x86_64.rpm"
+        name:
+          - "/tmp/docker-ce-selinux-{{ download_selinux.checksum }}.noarch.rpm"
+          - "/tmp/docker-ce-{{ download_docker.checksum }}.x86_64.rpm"
         state: present
 
     - name: Start Docker service
