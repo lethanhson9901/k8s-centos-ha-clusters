@@ -164,7 +164,7 @@
 
 - hosts: masters
   name: Init cluster and join masters
-  remote_user: vagrant
+  remote_user: root
   become: yes
   tasks:
     - name: Reset existing cluster
