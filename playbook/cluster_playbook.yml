@@ -107,11 +107,11 @@
           - /tmp/docker-ce-17.03.0.ce-1.el7.centos.x86_64.rpm
         state: present
 
-    - name: Start Docker service
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
+    # - name: Start Docker service
+    #   systemd:
+    #     name: docker
+    #     state: started
+    #     enabled: yes
         
     # Configure Docker daemon
     - name: Create Docker directory
