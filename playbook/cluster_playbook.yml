@@ -32,29 +32,34 @@
     - name: Read values from all system directories
       shell: sysctl --system
     
-    # # Install packages for yum to use HTTPS repository
-    # - name: Install yum-utils (RedHat only)
-    #   yum:
-    #     name: yum-utils
-    #     state: present
-    #     update_cache: yes
-    #   when: ansible_os_family == "RedHat"
-    
-    - name: Install yum-utils package
+    # Update system packages
+    - name: Update system packages
       yum:
-        name: yum-utils
-        state: present
+        name: '*'
+        state: update
+      register: update_result
 
+    # Install required packages
+    - name: Install required packages
+      yum:
+        name:
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+        state: present
+      when: update_result.changed
+
+    # Add Docker repository
     - name: Add Docker repository
       yum_repository:
         name: docker-ce
         description: Docker CE Stable Repository
-        baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+        baseurl: https://computingforgeeks.com/install-docker-ce-on-linux-systems/
         gpgcheck: yes
-        gpgkey: https://download.docker.com/linux/centos/gpg
+        state: present
 
-
-    - name: Install Docker Engine and dependencies
+    # Install Docker and plugins
+    - name: Install Docker and plugins
       yum:
         name:
           - docker-ce
@@ -64,10 +69,15 @@
           - docker-compose-plugin
         state: present
 
+    # Start and enable Docker service
     - name: Start Docker service
-      service:
+      systemd:
         name: docker
         state: started
+
+    - name: Enable Docker service
+      systemd:
+        name: docker
         enabled: yes
 
     - name: Verify Docker installation
