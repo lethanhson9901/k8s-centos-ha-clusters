@@ -85,11 +85,8 @@
 
     - name: Install Docker packages
       yum:
-        name:
-          - "/tmp/docker-ce-selinux-{{ download_selinux.checksum }}.noarch.rpm"
-          - "/tmp/docker-ce-{{ download_docker.checksum }}.x86_64.rpm"
+        name: "/tmp/docker-ce-selinux-{{ download_selinux.checksum }}.noarch.rpm,/tmp/docker-ce-{{ download_docker.checksum }}.x86_64.rpm"
         state: present
-
 
     - name: Start Docker service
       systemd:
