@@ -111,16 +111,15 @@
         append: yes
       become: yes
 
-    - name: Add Google Cloud public signing key
-      yum_key:
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-        state: present
-
-    - name: Add Kubernetes repository
+    - name: Add Kubernetes Yum repository
       yum_repository:
         name: kubernetes
-        description: Kubernetes repository for CentOS
+        description: Kubernetes repository
         baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        enabled: yes
+        gpgkey:
+          - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+          - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
         gpgcheck: yes
         state: present
 
