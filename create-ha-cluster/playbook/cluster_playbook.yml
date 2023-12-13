@@ -111,10 +111,9 @@
         append: yes
       become: yes
 
-    - name: Import GPG key for Google Cloud packages
+    - name: Add Google Cloud public signing key
       yum_key:
-        name: google_cloud_public_key
-        url: https://packages.cloud.google.com/yum/doc/yum-key.gpg
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
         state: present
 
     - name: Add Kubernetes repository
