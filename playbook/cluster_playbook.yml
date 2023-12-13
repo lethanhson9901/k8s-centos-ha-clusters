@@ -113,39 +113,39 @@
     #     state: started
     #     enabled: yes
         
-    # Configure Docker daemon
-    - name: Create Docker directory
-      file:
-        path: /etc/docker
-        state: directory
-        owner: root
-        group: root
-        mode: 0755
+    # # Configure Docker daemon
+    # - name: Create Docker directory
+    #   file:
+    #     path: /etc/docker
+    #     state: directory
+    #     owner: root
+    #     group: root
+    #     mode: 0755
     
-    - name: Create Docker daemon configuration file
-      copy:
-        content: ""
-        dest: /etc/docker/daemon.json
-        force: no
-        owner: root
-        group: root
-        mode: 0644
+    # - name: Create Docker daemon configuration file
+    #   copy:
+    #     content: ""
+    #     dest: /etc/docker/daemon.json
+    #     force: no
+    #     owner: root
+    #     group: root
+    #     mode: 0644
     
-    - name: Configure Docker daemon
-      copy:
-        content: |
-          {
-            "exec-opts": ["native.cgroupdriver=systemd"],
-            "log-driver": "json-file",
-            "log-opts": {
-              "max-size": "100m"
-            },
-            "storage-driver": "overlay2"
-          }
-        dest: /etc/docker/daemon.json
-        owner: root
-        group: root
-        mode: 0644
+    # - name: Configure Docker daemon
+    #   copy:
+    #     content: |
+    #       {
+    #         "exec-opts": ["native.cgroupdriver=systemd"],
+    #         "log-driver": "json-file",
+    #         "log-opts": {
+    #           "max-size": "100m"
+    #         },
+    #         "storage-driver": "overlay2"
+    #       }
+    #     dest: /etc/docker/daemon.json
+    #     owner: root
+    #     group: root
+    #     mode: 0644
     
     - name: Restart Docker
       systemd:
