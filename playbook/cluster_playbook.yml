@@ -184,9 +184,6 @@
       file:
         path: /var/lib/etcd
         state: absent
-    
-    - name: Switch to root user
-      command: sudo su
 
     - name: Init kubernetes cluster
       shell: |
