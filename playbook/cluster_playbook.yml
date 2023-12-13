@@ -32,44 +32,20 @@
     - name: Read values from all system directories
       shell: sysctl --system
     
-    # Install packages for yum to use HTTPS repository
-    - name: Install yum-utils (RedHat only)
-      yum:
-        name: yum-utils
-        state: present
-        update_cache: yes
-      when: ansible_os_family == "RedHat"
-    
-    # - name: Add Docker repository (RedHat only)
-    #   yum_repository:
-    #     name: docker-ce-stable
-    #     description: Docker CE Stable repository
-    #     baseurl: https://download.docker.com/linux/centos/7/x86_64/stable
-    #     gpgcheck: yes
-    #     gpgkey: https://download.docker.com/linux/centos/gpg
-    #     state: present
-    #   when: ansible_os_family == "RedHat"
-
-    
-    # # Install Docker engine and dependencies
-    # - name: Install Docker (RedHat only)
+    # # Install packages for yum to use HTTPS repository
+    # - name: Install yum-utils (RedHat only)
     #   yum:
-    #     name:
-    #       - docker-ce-stable
-    #       - docker-ce-cli
-    #       - containerd.io
-    #       - device-mapper-persistent-data
-    #       - lvm2
+    #     name: yum-utils
     #     state: present
     #     update_cache: yes
     #   when: ansible_os_family == "RedHat"
     
-    - name: Update packages
+    - name: Install yum-utils package
       yum:
-        name: "*"
-        state: latest
+        name: yum-utils
+        state: present
 
-    - name: Install Docker repository
+    - name: Add Docker repository
       yum_repository:
         name: docker-ce
         description: Docker CE Stable Repository
@@ -77,9 +53,14 @@
         gpgcheck: yes
         gpgkey: https://download.docker.com/linux/centos/gpg
 
-    - name: Install Docker CE version 17.03.0.ce
+    - name: Install Docker Engine and dependencies
       yum:
-        name: docker-ce-17.03.0.ce
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
         state: present
 
     - name: Start Docker service
