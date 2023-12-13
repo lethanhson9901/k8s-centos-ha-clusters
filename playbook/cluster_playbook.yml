@@ -64,54 +64,38 @@
     #     update_cache: yes
     #   when: ansible_os_family == "RedHat"
     
-    - name: Download Docker packages
-      get_url:
-        url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-selinux-17.03.0.ce-1.el7.centos.noarch.rpm
-        dest: /tmp/docker-ce-selinux-17.03.0.ce-1.el7.centos.noarch.rpm
-        mode: 0644
-      register: download_selinux
-
-    - name: Download Docker package
-      get_url:
-        url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-17.03.0.ce-1.el7.centos.x86_64.rpm
-        dest: /tmp/docker-ce-17.03.0.ce-1.el7.centos.x86_64.rpm
-        mode: 0644
-      register: download_docker
-
-    - name: Install Docker dependencies
+    - name: Update packages
       yum:
-        name: 
-          - yum-utils
-          - device-mapper-persistent-data
-          - lvm2
-        state: present
+        name: "*"
+        state: latest
 
-    - name: Download Docker packages
-      get_url:
-        url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-selinux-17.03.0.ce-1.el7.centos.noarch.rpm
-        dest: /tmp/docker-ce-selinux-17.03.0.ce-1.el7.centos.noarch.rpm
-        mode: 0644
-      register: download_selinux
+    - name: Install Docker repository
+      yum_repository:
+        name: docker-ce
+        description: Docker CE Stable Repository
+        baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/centos/gpg
 
-    - name: Download Docker package
-      get_url:
-        url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-17.03.0.ce-1.el7.centos.x86_64.rpm
-        dest: /tmp/docker-ce-17.03.0.ce-1.el7.centos.x86_64.rpm
-        mode: 0644
-      register: download_docker
-
-    - name: Install Docker packages
+    - name: Install Docker CE version 17.03.0.ce
       yum:
-        name:
-          - /tmp/docker-ce-selinux-17.03.0.ce-1.el7.centos.noarch.rpm
-          - /tmp/docker-ce-17.03.0.ce-1.el7.centos.x86_64.rpm
+        name: docker-ce-17.03.0.ce
         state: present
 
     - name: Start Docker service
-      systemd:
+      service:
         name: docker
         state: started
         enabled: yes
+
+    - name: Verify Docker installation
+      command: docker run hello-world
+      register: docker_run
+
+    - name: Assert Docker is running
+      assert:
+        that: docker_run.rc == 0
+        msg: "Docker is not running!"
         
     # # Configure Docker daemon
     # - name: Create Docker directory
