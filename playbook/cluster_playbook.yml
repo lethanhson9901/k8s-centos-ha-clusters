@@ -40,30 +40,62 @@
         update_cache: yes
       when: ansible_os_family == "RedHat"
     
-    - name: Add Docker repository (RedHat only)
-      yum_repository:
-        name: docker-ce-stable
-        description: Docker CE Stable repository
-        baseurl: https://download.docker.com/linux/centos/8/$basearch/stable
-        gpgcheck: yes
-        gpgkey: https://download.docker.com/linux/centos/gpg
-        state: present
-      when: ansible_os_family == "RedHat"
+    # - name: Add Docker repository (RedHat only)
+    #   yum_repository:
+    #     name: docker-ce-stable
+    #     description: Docker CE Stable repository
+    #     baseurl: https://download.docker.com/linux/centos/7/x86_64/stable
+    #     gpgcheck: yes
+    #     gpgkey: https://download.docker.com/linux/centos/gpg
+    #     state: present
+    #   when: ansible_os_family == "RedHat"
 
     
-    # Install Docker engine and dependencies
-    - name: Install Docker (RedHat only)
+    # # Install Docker engine and dependencies
+    # - name: Install Docker (RedHat only)
+    #   yum:
+    #     name:
+    #       - docker-ce-stable
+    #       - docker-ce-cli
+    #       - containerd.io
+    #       - device-mapper-persistent-data
+    #       - lvm2
+    #     state: present
+    #     update_cache: yes
+    #   when: ansible_os_family == "RedHat"
+    
+    - name: Download Docker packages
+      get_url:
+        url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-selinux-17.03.0.ce-1.el7.centos.noarch.rpm
+        dest: /tmp/docker-ce-selinux-17.03.0.ce-1.el7.centos.noarch.rpm
+        mode: 0644
+      register: download_selinux
+
+    - name: Download Docker package
+      get_url:
+        url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-17.03.0.ce-1.el7.centos.x86_64.rpm
+        dest: /tmp/docker-ce-17.03.0.ce-1.el7.centos.x86_64.rpm
+        mode: 0644
+      register: download_docker
+
+    - name: Install Docker dependencies
+      yum:
+        name: yum-utils device-mapper-persistent-data lvm2
+        state: present
+
+    - name: Install Docker packages
       yum:
         name:
-          - docker-ce-stable
-          - docker-ce-cli
-          - containerd.io
-          - device-mapper-persistent-data
-          - lvm2
+          - /tmp/docker-ce-selinux-{{ download_selinux.checksum }}.noarch.rpm
+          - /tmp/docker-ce-{{ download_docker.checksum }}.x86_64.rpm
         state: present
-        update_cache: yes
-      when: ansible_os_family == "RedHat"
-    
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+        
     # Configure Docker daemon
     - name: Create Docker directory
       file:
