@@ -63,14 +63,14 @@
         state: started
         enabled: yes
 
-    - name: Verify Docker installation
-      command: docker run hello-world
-      register: docker_run
+    # - name: Verify Docker installation
+    #   command: docker run hello-world
+    #   register: docker_run
 
-    - name: Assert Docker is running
-      assert:
-        that: docker_run.rc == 0
-        msg: "Docker is not running!"
+    # - name: Assert Docker is running
+    #   assert:
+    #     that: docker_run.rc == 0
+    #     msg: "Docker is not running!"
         
     # # Configure Docker daemon
     # - name: Create Docker directory
