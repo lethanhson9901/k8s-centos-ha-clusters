@@ -53,6 +53,7 @@
         gpgcheck: yes
         gpgkey: https://download.docker.com/linux/centos/gpg
 
+
     - name: Install Docker Engine and dependencies
       yum:
         name:
