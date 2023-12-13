@@ -1,114 +1,109 @@
----
-
 - hosts: masters, workers
   name: Setup masters and workers
-  remote_user: ci
+  remote_user: vagrant
   become: yes
   tasks:
-    # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin
-    - name: disable SWAP (Kubeadm requirement)
+    # Disable swap (Kubeadm requirement)
+    - name: Disable SWAP
       shell: |
         swapoff -a
-
-    - name: disable SWAP in fstab (Kubeadm requirement)
+    
+    - name: Disable SWAP in fstab (Kubeadm requirement)
       replace:
         path: /etc/fstab
         regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
         replace: '# \1'
-
+    
+    # Configure iptables for Kubeadm
     - name: Load br_netfilter module
       shell: |
         cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
         br_netfilter
         EOF
-
+    
     - name: Configure iptables to see bridged traffic
       shell: |
         cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
         net.bridge.bridge-nf-call-ip6tables = 1
         net.ipv4.ip_forward                 = 1
-        net.bridge.bridge-nf-call-iptables = 1
+        net.bridge.bridge-nf-call-iptables  = 1
         EOF
-
+    
     - name: Read values from all system directories
       shell: sysctl --system
-
-    # https://docs.docker.com/engine/install/ubuntu/#installation-methods
-    - name: Install packages to allow yum to use a repository over HTTPS
+    
+    # Install packages for yum to use HTTPS repository
+    - name: Install yum-utils (RedHat only)
       yum:
-        name:
-          - ca-certificates
-          - curl
-          - software-properties-common
+        name: yum-utils
         state: present
         update_cache: yes
       when: ansible_os_family == "RedHat"
-
-    - name: Add Docker’s official GPG key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
+    
+    # Configure Docker repository (RedHat only)
+    - name: Add Docker repository (RedHat only)
+      yum_repository:
+        name: docker-ce-stable
+        baseurl: https://download.docker.com/linux/centos/8/$basearch/stable
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/centos/gpg
         state: present
-
-    - name: Get Ubuntu release version
-      shell: lsb_release -cs
-      register: ubuntu_version
-
-    - name: Get architecture
-      shell: dpkg --print-architecture
-      register: architecture
-
-    - name: Add Docker repository
-      apt_repository:
-        repo: "deb [arch={{ architecture.stdout }}] https://download.docker.com/linux/ubuntu {{ ubuntu_version.stdout }} stable"
-        state: present
-        filename: docker
-
-    - name: Update apt packages
-      apt:
-        update_cache: "yes"
-        force_apt_get: "yes"
-
-    - name: Install Docker engine
-      apt:
+      when: ansible_os_family == "RedHat"
+    
+    # Install Docker engine and dependencies
+    - name: Install Docker (RedHat only)
+      yum:
         name:
-          - docker-ce
+          - docker-ce-stable
           - docker-ce-cli
           - containerd.io
+          - device-mapper-persistent-data
+          - lvm2
         state: present
         update_cache: yes
-
-    # https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+      when: ansible_os_family == "RedHat"
+    
+    # Configure Docker daemon
     - name: Create Docker directory
       file:
         path: /etc/docker
         state: directory
-
-    - name: Create Docker daemon empty file
+        owner: root
+        group: root
+        mode: 0755
+    
+    - name: Create Docker daemon configuration file
       copy:
         content: ""
         dest: /etc/docker/daemon.json
         force: no
-
+        owner: root
+        group: root
+        mode: 0644
+    
     - name: Configure Docker daemon
-      shell: |
-        cat <<EOF | sudo tee /etc/docker/daemon.json
-        {
-          "exec-opts": ["native.cgroupdriver=systemd"],
-          "log-driver": "json-file",
-          "log-opts": {
-            "max-size": "100m"
-          },
-          "storage-driver": "overlay2"
-        }
-        EOF
-
+      copy:
+        content: |
+          {
+            "exec-opts": ["native.cgroupdriver=systemd"],
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "100m"
+            },
+            "storage-driver": "overlay2"
+          }
+        dest: /etc/docker/daemon.json
+        owner: root
+        group: root
+        mode: 0644
+    
     - name: Restart Docker
       systemd:
         name: docker
         state: restarted
         enabled: yes
         daemon-reload: yes
-
+    
     - name: Add current user to docker group
       user:
         name: "{{ ansible_user }}"
@@ -116,103 +111,113 @@
         append: yes
       become: yes
 
-    - name: Add Google Cloud public signing key
-      apt_key:
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    - name: Import GPG key for Google Cloud packages
+      yum_key:
+        name: google_cloud_public_key
+        url: https://packages.cloud.google.com/yum/doc/yum-key.gpg
         state: present
 
     - name: Add Kubernetes repository
-      apt_repository:
-        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+      yum_repository:
+        name: kubernetes
+        description: Kubernetes repository for CentOS
+        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        gpgcheck: yes
         state: present
-        filename: kubernetes
-        mode: 0600
 
     - name: Install kubelet, kubeadm and kubectl
-      apt:
+      yum:
         name:
-          - kubeadm=1.28.*
-          - kubectl=1.28.*
-          - kubelet=1.28.*
+          - kubelet-1.28.*
+          - kubeadm-1.28.*
+          - kubectl-1.28.*
         state: present
 
     - name: Enable kubelet service
-      service:
+      systemd:
         name: kubelet
         enabled: yes
 
-    - name: load br_netfilter kernel module
+    - name: Load br_netfilter kernel module
       modprobe:
         name: br_netfilter
         state: present
 
-    - name: set bridge-nf-call-iptables
+    - name: Set net.bridge.bridge-nf-call-iptables
       sysctl:
         name: net.bridge.bridge-nf-call-iptables
         value: 1
+        state: present
 
-    - name: set ip_forward
+    - name: Set net.ipv4.ip_forward
       sysctl:
         name: net.ipv4.ip_forward
         value: 1
-        
+        state: present
+
 - hosts: masters
   name: Init cluster and join masters
-  remote_user: ci
+  remote_user: vagrant
   become: yes
   tasks:
     - name: Reset existing cluster
-      shell: kubeadm reset -f
+      command: kubeadm reset -f
 
     - name: Remove .kube in user home directory
-      shell: rm -rf .kube
+      file:
+        path: ~/.kube
+        state: absent
 
     - name: Remove /etc/kubernetes/manifests directory
-      shell: rm -rf /etc/kubernetes/manifests
+      file:
+        path: /etc/kubernetes/manifests
+        state: absent
 
     - name: Remove /var/lib/etcd directory
-      shell: rm -rf /var/lib/etcd
+      file:
+        path: /var/lib/etcd
+        state: absent
 
     - name: Init kubernetes cluster
-      shell: kubeadm init --control-plane-endpoint={{ cluster_vip }}:6443 --upload-certs --apiserver-advertise-address=192.168.56.21 --pod-network-cidr=192.168.0.0/16
+      shell: kubeadm init --control-plane-endpoint={{ cluster_vip }}:6443 --upload-certs --apiserver-advertise-address=192.168.56.134 --pod-network-cidr=192.168.0.0/16
       run_once: yes
-      delegate_to: "192.168.56.21"
+      delegate_to: "192.168.56.134"
 
     # Add Calico Network
     - name: Download Calico manifest
       get_url:
         url: https://docs.projectcalico.org/manifests/calico.yaml
-        dest: /home/ci/calico.yaml
+        dest: /home/vagrant/calico.yaml
         mode: '0644'
       run_once: yes
-      delegate_to: "192.168.56.21"
+      delegate_to: "192.168.56.134"
 
     - name: Deploy Calico network
-      shell: kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /home/ci/calico.yaml
+      shell: kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /home/vagrant/calico.yaml
       run_once: yes
-      delegate_to: "192.168.56.21"
+      delegate_to: "192.168.56.134"
 
     - name: Print join command
       shell: kubeadm token create --print-join-command
       register: kubernetes_join_command
       run_once: yes
-      delegate_to: "192.168.56.21"
+      delegate_to: "192.168.56.134"
 
     - name: Copy join command to local
       become: no
       local_action: copy content="{{ kubernetes_join_command.stdout_lines[0] }}" dest="/tmp/kubernetes_join_command" mode=0777
       run_once: yes
-      delegate_to: "192.168.56.21"
+      delegate_to: "192.168.56.134"
 
     - name: Generate certificate key
       shell: kubeadm init phase upload-certs --upload-certs
       register: kubernetes_certificate_key
       run_once: yes
-      delegate_to: "192.168.56.21"
+      delegate_to: "192.168.56.134"
 
     - name: Execute master join command
       become: yes
-      when: inventory_hostname != "192.168.56.21"
+      when: inventory_hostname != "192.168.56.134"
       shell: "{{ kubernetes_join_command.stdout_lines[0] }} --control-plane --certificate-key {{ kubernetes_certificate_key.stdout_lines[2] }} --apiserver-advertise-address={{ inventory_hostname }}"
 
     # This got updated after the video
@@ -231,10 +236,10 @@
 
     - name: Create directory for kube config
       file:
-        path: /home/ci/.kube
+        path: /home/vagrant/.kube
         state: directory
-        owner: ci
-        group: ci
+        owner: vagrant
+        group: vagrant
         mode: 0755
 
     - name: Copy /etc/kubernetes/admin.conf to user home directory
@@ -243,15 +248,15 @@
       become: yes
       copy:
         src: /etc/kubernetes/admin.conf
-        dest: /home/ci/.kube/config
+        dest: /home/vagrant/.kube/config
         remote_src: yes
-        owner: ci
-        group: ci
+        owner: vagrant
+        group: vagrant
         mode: '0644'
 
 - hosts: workers
   name: Join workers
-  remote_user: ci
+  remote_user: vagrant
   become: yes
   tasks:
     - name: Reset existing cluster
