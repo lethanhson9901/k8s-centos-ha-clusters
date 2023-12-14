@@ -1,8 +1,8 @@
 - hosts: masters, workers
   name: Setup masters and workers
-  become_user: root
-  become_method: su
   become: yes
+  become_method: sudo
+  become_user: root
   tasks:
     # Disable swap (Kubeadm requirement)
     - name: Disable SWAP
@@ -164,9 +164,9 @@
         state: present
 
 - hosts: masters
-  become_user: root
-  become_method: su
   become: yes
+  become_method: sudo
+  become_user: root
   tasks:
     - name: Reset existing cluster
       command: kubeadm reset -f
