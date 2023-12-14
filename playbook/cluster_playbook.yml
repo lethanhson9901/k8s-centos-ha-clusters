@@ -188,8 +188,6 @@
     - name: Init kubernetes cluster
       shell: |
         kubeadm init --control-plane-endpoint={{ cluster_vip }}:6443 --upload-certs --apiserver-advertise-address=192.168.56.134 --pod-network-cidr=192.168.0.0/16
-      args:
-        executable: /bin/bash
       run_once: yes
       delegate_to: "192.168.56.134"
 
