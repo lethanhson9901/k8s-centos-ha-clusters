@@ -105,12 +105,37 @@
         enabled: yes
         daemon-reload: yes
     
-    # - name: Add current user to docker group
-    #   user:
-    #     name: "{{ ansible_user }}"
-    #     groups: docker
-    #     append: yes
-    #   become: yes
+    - name: Create containerd config directory
+      file:
+        path: /etc/containerd
+        state: directory
+        mode: 0755
+
+    - name: Download containerd default config
+      get_url:
+        url: https://raw.githubusercontent.com/containerd/containerd/main/config.toml
+        dest: /tmp/containerd_config.toml
+        mode: 0644
+
+    - name: Replace SystemdCgroup option
+      lineinfile:
+        path: /tmp/containerd_config.toml
+        state: present
+        regexp: '^SystemdCgroup = (true|false)$'
+        line: 'SystemdCgroup = true'
+        backup: yes
+
+    - name: Move config file to proper location
+      copy:
+        src: /tmp/containerd_config.toml
+        dest: /etc/containerd/config.toml
+        mode: 0644
+
+    - name: Enable and start containerd
+      systemd:
+        name: containerd
+        enabled: yes
+        state: started
 
     - name: Add Kubernetes Yum repository
       yum_repository:
