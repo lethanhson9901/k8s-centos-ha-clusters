@@ -63,15 +63,6 @@
         name: docker
         state: started
         enabled: yes
-
-    # - name: Verify Docker installation
-    #   command: docker run hello-world
-    #   register: docker_run
-
-    # - name: Assert Docker is running
-    #   assert:
-    #     that: docker_run.rc == 0
-    #     msg: "Docker is not running!"
         
     # Configure Docker daemon
     - name: Create Docker directory
@@ -114,12 +105,12 @@
         enabled: yes
         daemon-reload: yes
     
-    - name: Add current user to docker group
-      user:
-        name: "{{ ansible_user }}"
-        groups: docker
-        append: yes
-      become: yes
+    # - name: Add current user to docker group
+    #   user:
+    #     name: "{{ ansible_user }}"
+    #     groups: docker
+    #     append: yes
+    #   become: yes
 
     - name: Add Kubernetes Yum repository
       yum_repository:

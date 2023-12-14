@@ -8,7 +8,7 @@ This will set up a new multi-master Kubernetes cluster that has
 ![setup.png](setup.png?raw=true "setup.png")
 
 ## Disclaimer
-This repo is based on [Setup a multi-master Kubernetes cluster with kubeadm](https://github.com/tranductrinh/k8s/blob/main/create-ha-cluster/README.md). But my setup is for CentOS server
+This repo is based on [Setup a multi-master Kubernetes cluster with kubeadm](https://github.com/tranductrinh/k8s/blob/main/create-ha-cluster/README.md). But my setup is for CentOS server and using user root
 
 ## Prerequisites
 Before you want to try this on your local, here are requirements
