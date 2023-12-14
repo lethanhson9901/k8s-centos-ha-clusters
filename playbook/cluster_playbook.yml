@@ -1,6 +1,7 @@
 - hosts: masters, workers
   name: Setup masters and workers
-  remote_user: vagrant
+  become_user: root
+  become_method: su
   become: yes
   tasks:
     # Disable swap (Kubeadm requirement)
@@ -163,8 +164,8 @@
         state: present
 
 - hosts: masters
-  name: Init cluster and join masters
-  remote_user: vagrant
+  become_user: root
+  become_method: su
   become: yes
   tasks:
     - name: Reset existing cluster
@@ -195,13 +196,13 @@
     - name: Download Calico manifest
       get_url:
         url: https://docs.projectcalico.org/manifests/calico.yaml
-        dest: /home/vagrant/calico.yaml
+        dest: /root/calico.yaml
         mode: '0644'
       run_once: yes
       delegate_to: "192.168.56.134"
 
     - name: Deploy Calico network
-      shell: kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /home/vagrant/calico.yaml
+      shell: kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /root/calico.yaml
       run_once: yes
       delegate_to: "192.168.56.134"
 
@@ -244,7 +245,7 @@
 
     - name: Create directory for kube config
       file:
-        path: /home/vagrant/.kube
+        path: /root/.kube
         state: directory
         owner: vagrant
         group: vagrant
@@ -256,7 +257,7 @@
       become: yes
       copy:
         src: /etc/kubernetes/admin.conf
-        dest: /home/vagrant/.kube/config
+        dest: /root/.kube/config
         remote_src: yes
         owner: vagrant
         group: vagrant
