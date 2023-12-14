@@ -105,37 +105,33 @@
         enabled: yes
         daemon-reload: yes
     
-    - name: Create containerd config directory
-      file:
-        path: /etc/containerd
-        state: directory
-        mode: 0755
+    # - name: Configure systemd cgroup driver for Containerd
+    #   block:
+    #     - name: Define Containerd config path
+    #       set_fact:
+    #         containerd_config_path: /etc/containerd/config.toml
 
-    - name: Download containerd default config
-      get_url:
-        url: https://raw.githubusercontent.com/containerd/containerd/main/config.toml
-        dest: /tmp/containerd_config.toml
-        mode: 0644
+    #     - name: Remove existing Containerd config file
+    #       file:
+    #         path: "{{ containerd_config_path }}"
+    #         state: absent
 
-    - name: Replace SystemdCgroup option
-      lineinfile:
-        path: /tmp/containerd_config.toml
-        state: present
-        regexp: '^SystemdCgroup = (true|false)$'
-        line: 'SystemdCgroup = true'
-        backup: yes
+    #     - name: Create default Containerd config file
+    #       shell: containerd config default > "{{ containerd_config_path }}"
+    #       args:
+    #         creates: "{{ containerd_config_path }}"
 
-    - name: Move config file to proper location
-      copy:
-        src: /tmp/containerd_config.toml
-        dest: /etc/containerd/config.toml
-        mode: 0644
+    #     - name: Set SystemdCgroup to true in Containerd config
+    #       lineinfile:
+    #         path: "{{ containerd_config_path }}"
+    #         regexp: '^SystemdCgroup = false'
+    #         line: 'SystemdCgroup = true'
 
-    - name: Enable and start containerd
+    - name: Enable and restart Containerd
       systemd:
         name: containerd
         enabled: yes
-        state: started
+        state: restarted
 
     - name: Add Kubernetes Yum repository
       yum_repository:
