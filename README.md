@@ -1,4 +1,4 @@
-# Setup a multi-master Kubernetes cluster with kubeadm
+# Setup a multi-master Kubernetes cluster with kubeadm in CentOS
 
 This will set up a new multi-master Kubernetes cluster that has
 * 3 masters, each master has 2 CPUs and 2 GBs RAM
@@ -6,6 +6,9 @@ This will set up a new multi-master Kubernetes cluster that has
 * 2 load balancers, each load balancer has 1 CPU and 1 GB RAM
 
 ![setup.png](setup.png?raw=true "setup.png")
+
+## Disclaimer
+This repo is based on [Setup a multi-master Kubernetes cluster with kubeadm](https://github.com/tranductrinh/k8s/blob/main/create-ha-cluster/README.md). But my setup is for CentOS server
 
 ## Prerequisites
 Before you want to try this on your local, here are requirements
