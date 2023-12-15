@@ -33,6 +33,11 @@
     - name: Read values from all system directories
       shell: sysctl --system
     
+    - name: Clean all yum cache
+      command: yum clean all
+      become: yes
+
+
     - name: Update all packages to the latest version
       yum:
         name: '*'
