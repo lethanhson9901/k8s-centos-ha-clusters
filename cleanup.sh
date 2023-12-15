@@ -1,9 +1,44 @@
 #!/bin/bash
 
-# Stop and disable Kubernetes services
-echo "Stopping and disabling Kubernetes services..."
+# Stopping kubelet service
+echo "Stopping kubelet service..."
 sudo systemctl stop kubelet
+
+# Disabling kubelet service
+echo "Disabling kubelet service..."
 sudo systemctl disable kubelet
+
+# Removing kubelet service files
+echo "Removing kubelet service files..."
+sudo rm -f /etc/systemd/system/kubelet.service
+sudo rm -rf /etc/systemd/system/kubelet.service.d
+
+# Removing kubeadm, kubelet, and kubectl binaries
+echo "Removing kubeadm, kubelet, and kubectl binaries..."
+sudo rm -f /usr/bin/kubeadm
+sudo rm -f /usr/bin/kubelet
+sudo rm -f /usr/bin/kubectl  # Remove this line if you didn't install kubectl
+
+# Removing CNI plugin files
+echo "Removing CNI plugin files..."
+sudo rm -rf /opt/cni/bin
+
+# Removing crictl binary
+echo "Removing crictl binary..."
+sudo rm -f /usr/bin/crictl
+
+# Resetting kubeadm (optional, only if a cluster was initiated)
+read -p "Do you want to reset kubeadm? This will clean up any Kubernetes configuration. (y/N) " yn
+case $yn in
+    [Yy]* ) sudo kubeadm reset; ;;
+    * ) echo "Skipping kubeadm reset."; ;;
+esac
+
+# Reloading systemd daemon
+echo "Reloading systemd daemon..."
+sudo systemctl daemon-reload
+
+echo "Kubernetes components removal complete."
 
 # Uninstall Kubernetes components
 echo "Uninstalling Kubernetes components..."
