@@ -27,6 +27,8 @@ sudo sysctl --system
 # Install yum-utils and add Docker repository
 sudo yum install -y yum-utils
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum install containerd.io -y
+yum install -y docker-ce docker-ce-cli
 
 # Start and enable Docker
 sudo systemctl start docker
