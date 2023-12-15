@@ -58,6 +58,26 @@ sudo chown root:root /etc/docker/daemon.json
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 
+
+# Define Containerd config path
+containerd_config_path="/etc/containerd/config.toml"
+
+# Remove existing Containerd config file
+if [ -f "$containerd_config_path" ]; then
+    echo "Removing existing Containerd config file..."
+    rm "$containerd_config_path"
+fi
+
+# Create default Containerd config file
+echo "Creating default Containerd config file..."
+containerd config default > "$containerd_config_path"
+
+# Set SystemdCgroup to true in Containerd config
+echo "Setting SystemdCgroup to true in Containerd config..."
+sed -i '/^SystemdCgroup = false/c\SystemdCgroup = true' "$containerd_config_path"
+
+echo "Configuration complete."
+
 # Enable and restart containerd
 sudo systemctl enable containerd
 sudo systemctl restart containerd
