@@ -70,7 +70,7 @@ sudo mkdir -p "$DEST"
 curl -L "https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGINS_VERSION}/cni-plugins-linux-${ARCH}-${CNI_PLUGINS_VERSION}.tgz" | sudo tar -C "$DEST" -xz
 
 #Define the directory to download command files
-DOWNLOAD_DIR="/usr/local/bin"
+DOWNLOAD_DIR="/usr/bin"
 sudo mkdir -p "$DOWNLOAD_DIR"
 
 # Install crictl (required for kubeadm / Kubelet Container Runtime Interface (CRI)):
