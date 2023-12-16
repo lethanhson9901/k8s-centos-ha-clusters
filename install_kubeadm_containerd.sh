@@ -25,7 +25,7 @@ EOF
 sysctl --system
 
 # Install yum-utils and add Docker repository
-yum install -y yum-utils
+yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum install containerd.io -y
 yum install -y docker-ce docker-ce-cli
@@ -128,6 +128,9 @@ curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSIO
 
 # Enable and start kubelet
 systemctl enable --now kubelet
+
+systemctl restart docker && systemctl enable docker
+systemctl restart kubelet && systemctl enable --now kubelet
 
 # Configuring a cgroup driver
 # Note: Ensure that the container runtime and kubelet cgroup drivers match.
