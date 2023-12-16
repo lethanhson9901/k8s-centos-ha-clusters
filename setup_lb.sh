@@ -1,66 +1,82 @@
 #!/bin/bash
 
-# Define the cluster VIP (replace with your actual cluster VIP)
-CLUSTER_VIP="your_cluster_vip"  # Replace with the actual cluster VIP
+CONFIG_FILE="config/lb_config.yml"
 
-# Install HAProxy
-sudo yum update -y
-sudo yum install -y haproxy
+# Ports configuration
+MASTER_PORT="6443"
+WORKER_HTTP_PORT="30100"
+WORKER_HTTPS_PORT="30101"
+
+# Check if the config file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Configuration file not found: $CONFIG_FILE"
+    exit 1
+fi
+
+# Read values from the YAML file
+CLUSTER_VIP=$(yq e '.cluster_vip' "$CONFIG_FILE")
+MASTER_NODES=($(yq e '.master_nodes[]' "$CONFIG_FILE"))
+WORKER_NODES=($(yq e '.worker_nodes[]' "$CONFIG_FILE"))
+
+# Function to generate HAProxy backend configuration
+generate_haproxy_backend() {
+    local backend_name=$1
+    local nodes=("${!2}")
+    local mode=$3
+    local port=$4
+
+    echo "  backend ${backend_name}"
+    echo "    mode ${mode}"
+    echo "    balance roundrobin"
+    echo "    timeout connect 10s"
+    echo "    timeout client 30s"
+    echo "    timeout server 30s"
+
+    for node in "${nodes[@]}"; do
+        echo "    server ${node} ${node}:${port} check"
+    done
+}
 
 # Configure HAProxy
-sudo tee /etc/haproxy/haproxy.cfg << EOF
+echo "Configuring HAProxy..."
+sudo bash -c "cat <<EOF > /etc/haproxy/haproxy.cfg
 frontend kube_apiserver_frontend
   bind *:6443
   mode tcp
   option tcplog
+  log global
   default_backend kube_apiserver_backend
 
-backend kube_apiserver_backend
-  option httpchk GET /healthz
-  http-check expect status 200
-  mode tcp
-  option ssl-hello-chk
-  balance roundrobin
-    server k8s-master-1 172.16.1.11:6443 check fall 3 rise 2
-    server k8s-master-2 172.16.1.12:6443 check fall 3 rise 2
-    server k8s-master-3 172.16.1.13:6443 check fall 3 rise 2
+$(generate_haproxy_backend kube_apiserver_backend MASTER_NODES[@] tcp $MASTER_PORT)
 
 frontend http_frontend
   bind *:80
   mode tcp
   option tcplog
+  log global
   default_backend http_backend
 
-backend http_backend
-  mode tcp
-  balance roundrobin
-    server k8s-worker-1 172.16.2.11:30100 check send-proxy-v2
-    server k8s-worker-2 172.16.2.12:30100 check send-proxy-v2
-    server k8s-worker-3 172.16.2.13:30100 check send-proxy-v2
+$(generate_haproxy_backend http_backend WORKER_NODES[@] tcp $WORKER_HTTP_PORT)
 
 frontend https_frontend
   bind *:443
   mode tcp
   option tcplog
+  log global
   default_backend https_backend
 
-backend https_backend
-  mode tcp
-  balance roundrobin
-    server k8s-worker-1 172.16.2.11:30101 check send-proxy-v2
-    server k8s-worker-2 172.16.2.12:30101 check send-proxy-v2
-    server k8s-worker-3 172.16.2.13:30101 check send-proxy-v2
-EOF
+$(generate_haproxy_backend https_backend WORKER_NODES[@] tcp $WORKER_HTTPS_PORT)
+
+EOF"
 
 # Restart HAProxy
+echo "Restarting HAProxy..."
 sudo systemctl restart haproxy
 sudo systemctl enable haproxy
 
-# Install Keepalived
-sudo yum install -y keepalived
-
 # Configure Keepalived
-sudo tee /etc/keepalived/keepalived.conf << EOF
+echo "Configuring Keepalived..."
+sudo bash -c "cat <<EOF > /etc/keepalived/keepalived.conf
 vrrp_script check_apiserver {
   script "killall -0 haproxy"
   interval 3
@@ -84,10 +100,11 @@ vrrp_instance VI_1 {
         check_apiserver
     }
 }
-EOF
+EOF"
 
 # Restart Keepalived
+echo "Restarting Keepalived..."
 sudo systemctl restart keepalived
 sudo systemctl enable keepalived
 
-echo "Load balancer setup complete."
+echo "Configuration completed."
