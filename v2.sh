@@ -1,7 +1,22 @@
 #!/bin/bash
 
+# Set hostname based on IP address
+MY_IP=$(hostname -I | awk '{print $1}')
+case $MY_IP in
+    10.16.150.138) hostnamectl set-hostname k8s-master-1 ;;
+    10.16.150.139) hostnamectl set-hostname k8s-master-2 ;;
+    10.16.150.140) hostnamectl set-hostname k8s-master-3 ;;
+    10.16.150.134) hostnamectl set-hostname k8s-worker-1 ;;
+    10.16.150.135) hostnamectl set-hostname k8s-worker-2 ;;
+    10.16.150.136) hostnamectl set-hostname k8s-worker-3 ;;
+    10.16.150.132) hostnamectl set-hostname k8s-lb-1 ;;
+    10.16.150.133) hostnamectl set-hostname k8s-lb-2 ;;
+    10.16.150.137) hostnamectl set-hostname vip ;;
+    *) echo "IP address not recognized. Hostname not changed." ;;
+esac
+
 # Configure /etc/hosts
-cat <<EOF >> /etc/hosts
+cat <<EOF > /etc/hosts
 10.16.150.138      k8s-master-1
 10.16.150.139      k8s-master-2
 10.16.150.140      k8s-master-3

@@ -1,5 +1,33 @@
 #!/bin/bash
 
+# Set hostname based on IP address
+MY_IP=$(hostname -I | awk '{print $1}')
+case $MY_IP in
+    10.16.150.138) hostnamectl set-hostname k8s-master-1 ;;
+    10.16.150.139) hostnamectl set-hostname k8s-master-2 ;;
+    10.16.150.140) hostnamectl set-hostname k8s-master-3 ;;
+    10.16.150.134) hostnamectl set-hostname k8s-worker-1 ;;
+    10.16.150.135) hostnamectl set-hostname k8s-worker-2 ;;
+    10.16.150.136) hostnamectl set-hostname k8s-worker-3 ;;
+    10.16.150.132) hostnamectl set-hostname k8s-lb-1 ;;
+    10.16.150.133) hostnamectl set-hostname k8s-lb-2 ;;
+    10.16.150.137) hostnamectl set-hostname vip ;;
+    *) echo "IP address not recognized. Hostname not changed." ;;
+esac
+
+# Configure /etc/hosts
+cat <<EOF > /etc/hosts
+10.16.150.138      k8s-master-1
+10.16.150.139      k8s-master-2
+10.16.150.140      k8s-master-3
+10.16.150.134      k8s-worker-1
+10.16.150.135      k8s-worker-2
+10.16.150.136      k8s-worker-3
+10.16.150.132      k8s-lb-1
+10.16.150.133      k8s-lb-2
+10.16.150.137      vip
+EOF
+
 # Update all packages
 yum update -y
 
@@ -129,14 +157,20 @@ curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSIO
 # Enable and start kubelet
 systemctl enable --now kubelet
 
+echo "Configuring cgroup driver..."
+# Change the cgroup-driver for Kubernetes to match Docker
+DOCKER_CGROUP_DRIVER=$(docker info | grep -i "Cgroup Driver" | cut -d' ' -f3)
+sed -i "s/cgroup-driver=systemd/cgroup-driver=$DOCKER_CGROUP_DRIVER/g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+# Reload systemd and restart kubelet
+systemctl daemon-reload
+
 systemctl restart docker && systemctl enable docker
 systemctl restart kubelet && systemctl enable --now kubelet
 
 # Configuring a cgroup driver
 # Note: Ensure that the container runtime and kubelet cgroup drivers match.
 # This part of the script might need to be adjusted based on the specific runtime and system configuration.
-echo "Configuring cgroup driver..."
-# Example configurations can be added here
 
 echo "Kubernetes installation script execution completed."
 
@@ -145,5 +179,9 @@ echo "Kubernetes installation script execution completed."
 modprobe br_netfilter
 sysctl -w net.bridge.bridge-nf-call-iptables=1
 sysctl -w net.ipv4.ip_forward=1
+
+sysctl --system
+sysctl -p /etc/sysctl.d/k8s.conf
+iptables -P FORWARD ACCEPT
 
 echo "Setup complete."

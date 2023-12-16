@@ -7,6 +7,34 @@ MASTER_PORT="6443"
 WORKER_HTTP_PORT="30100"
 WORKER_HTTPS_PORT="30101"
 
+# Set hostname based on IP address
+MY_IP=$(hostname -I | awk '{print $1}')
+case $MY_IP in
+    10.16.150.138) hostnamectl set-hostname k8s-master-1 ;;
+    10.16.150.139) hostnamectl set-hostname k8s-master-2 ;;
+    10.16.150.140) hostnamectl set-hostname k8s-master-3 ;;
+    10.16.150.134) hostnamectl set-hostname k8s-worker-1 ;;
+    10.16.150.135) hostnamectl set-hostname k8s-worker-2 ;;
+    10.16.150.136) hostnamectl set-hostname k8s-worker-3 ;;
+    10.16.150.132) hostnamectl set-hostname k8s-lb-1 ;;
+    10.16.150.133) hostnamectl set-hostname k8s-lb-2 ;;
+    10.16.150.137) hostnamectl set-hostname vip ;;
+    *) echo "IP address not recognized. Hostname not changed." ;;
+esac
+
+# Configure /etc/hosts
+cat <<EOF > /etc/hosts
+10.16.150.138      k8s-master-1
+10.16.150.139      k8s-master-2
+10.16.150.140      k8s-master-3
+10.16.150.134      k8s-worker-1
+10.16.150.135      k8s-worker-2
+10.16.150.136      k8s-worker-3
+10.16.150.132      k8s-lb-1
+10.16.150.133      k8s-lb-2
+10.16.150.137      vip
+EOF
+
 # Check if the config file exists
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "Configuration file not found: $CONFIG_FILE"
@@ -97,10 +125,16 @@ touch /etc/keepalived/keepalived.conf
 # Configure Keepalived
 echo "Configuring Keepalived..."
 bash -c "cat <<EOF > /etc/keepalived/keepalived.conf
+global_defs {
+    router_id LVS_DEVEL
+}
+
 vrrp_script check_apiserver {
-  script "killall -0 haproxy"
+  script "/etc/keepalived/check_apiserver.sh"
   interval 3
-  timeout 10
+  weight -2
+  fall 10
+  rise 2
 }
 
 vrrp_instance VI_1 {
