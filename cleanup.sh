@@ -1,76 +1,54 @@
 #!/bin/bash
 
-# Stopping kubelet service
-echo "Stopping kubelet service..."
-systemctl stop kubelet
+# Stop and disable kubelet, docker, and containerd services
+echo "Stopping and disabling kubelet, docker, and containerd services..."
+systemctl stop kubelet docker containerd
+systemctl disable kubelet docker containerd
 
-# Disabling kubelet service
-echo "Disabling kubelet service..."
-systemctl disable kubelet
+# Uninstall kubeadm, kubelet, kubectl
+echo "Uninstalling kubeadm, kubelet, and kubectl..."
+yum remove -y kubeadm kubelet kubectl
 
-# Removing kubelet service files
-echo "Removing kubelet service files..."
-rm -f /etc/systemd/system/kubelet.service
-rm -rf /etc/systemd/system/kubelet.service.d
+# Remove Kubernetes configuration directory and files
+echo "Removing Kubernetes configuration directories and files..."
+rm -rf /etc/kubernetes /root/.kube /etc/sysctl.d/k8s.conf /etc/systemd/system/kubelet.service.d /etc/systemd/system/kubelet.service
 
-# Removing kubeadm, kubelet, and kubectl binaries
-echo "Removing kubeadm, kubelet, and kubectl binaries..."
-rm -f /usr/bin/kubeadm
-rm -f /usr/bin/kubelet
-rm -f /usr/bin/kubectl  # Remove this line if you didn't install kubectl
+# Remove Kubernetes binaries if they were manually installed
+echo "Removing manually installed Kubernetes binaries..."
+rm -rf /usr/bin/kubeadm /usr/bin/kubelet /usr/bin/kubectl
+rm -rf /usr/local/bin/kubeadm /usr/local/bin/kubelet /usr/local/bin/kubectl
+# Remove CNI plugins
+echo "Removing CNI plugins..."
+rm -rf /opt/cni
 
-# Removing CNI plugin files
-echo "Removing CNI plugin files..."
-rm -rf /opt/cni/bin
-
-# Removing crictl binary
-echo "Removing crictl binary..."
-rm -f /usr/bin/crictl
-
-# Resetting kubeadm (optional, only if a cluster was initiated)
-read -p "Do you want to reset kubeadm? This will clean up any Kubernetes configuration. (y/N) " yn
-case $yn in
-    [Yy]* ) kubeadm reset; ;;
-    * ) echo "Skipping kubeadm reset."; ;;
-esac
-
-# Reloading systemd daemon
-echo "Reloading systemd daemon..."
-systemctl daemon-reload
-
-echo "Kubernetes components removal complete."
-
-# Uninstall Kubernetes components
-echo "Uninstalling Kubernetes components..."
-yum remove -y kubelet kubeadm kubectl
-
-# Stop and disable Docker
-echo "Stopping and disabling Docker..."
-systemctl stop docker
-systemctl disable docker
+# Uninstall containerd
+echo "Uninstalling containerd..."
+yum remove -y containerd.io
 
 # Uninstall Docker
 echo "Uninstalling Docker..."
-yum remove -y docker-ce docker-ce-cli containerd.io
+yum remove -y docker-ce docker-ce-cli
 
-# Remove Docker and Kubernetes configurations
-echo "Removing Docker and Kubernetes configuration files..."
+# Remove Docker configuration directory
+echo "Removing Docker configuration directory..."
 rm -rf /etc/docker
-rm -f /etc/yum.repos.d/kubernetes.repo
 
-# Revert sysctl and kernel module settings
-echo "Reverting sysctl and kernel module settings..."
-rm -f /etc/sysctl.d/k8s.conf
-sysctl --system
-
-# Re-enable swap (optional)
-echo "Re-enabling swap..."
-sed -i '/\sswap\s/ s/^#//' /etc/fstab
-swapon -a
-
-# Reset SELinux to enforcing (optional)
+# Reset SELinux to enforcing mode
 echo "Resetting SELinux to enforcing mode..."
 setenforce 1
 sed -i 's/^SELINUX=permissive$/SELINUX=enforcing/' /etc/selinux/config
 
-echo "Cleanup complete. Please reboot your system."
+# Re-enable swap
+echo "Re-enabling swap..."
+sed -i '/\sswap\s/ s/^#//' /etc/fstab
+swapon -a
+
+# Reload sysctl to reset networking settings
+echo "Reloading sysctl to reset networking settings..."
+sysctl --system
+
+# Clean yum cache
+echo "Cleaning yum cache..."
+yum clean all
+
+echo "Uninstallation and cleanup complete."
