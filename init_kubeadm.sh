@@ -39,7 +39,7 @@ sudo rm -rf ~/.kube
 sudo rm -rf /etc/kubernetes/manifests /var/lib/etcd
 
 # Initialize the Kubernetes cluster
-sudo kubeadm init --control-plane-endpoint="${CLUSTER_VIP}:6443" --upload-certs --apiserver-advertise-address=${NODE_IP} --pod-network-cidr=${POD_NETWORK_CIDR}
+sudo kubeadm init --control-plane-endpoint="${CLUSTER_VIP}:6443" --upload-certs --apiserver-advertise-address=${NODE_IP} --pod-network-cidr=${POD_NETWORK_CIDR}  --v=5
 
 # Download and deploy Calico network
 sudo curl -o /root/calico.yaml -L ${CALICO_YAML_URL}

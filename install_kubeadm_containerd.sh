@@ -82,36 +82,61 @@ echo "Configuration complete."
 sudo systemctl enable containerd
 sudo systemctl restart containerd
 
-# Install CNI plugins (required for most pod networks)
+#!/bin/bash
+
+# Check Required Ports
+# Note: Update the port numbers based on your requirement
+echo "Checking required ports..."
+nc -zv 127.0.0.1 6443
+# Add additional port checks as needed
+
+# Install Container Runtime
+# Note: Choose one of the container runtimes (containerd, CRI-O, or Docker Engine with cri-dockerd)
+echo "Installing container runtime..."
+# Example for containerd (uncomment to use)
+# sudo apt-get install -y containerd
+
+# Install CNI Plugins
+echo "Installing CNI plugins..."
 CNI_PLUGINS_VERSION="v1.3.0"
 ARCH="amd64"
 DEST="/opt/cni/bin"
 sudo mkdir -p "$DEST"
 curl -L "https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGINS_VERSION}/cni-plugins-linux-${ARCH}-${CNI_PLUGINS_VERSION}.tgz" | sudo tar -C "$DEST" -xz
 
-# Define the directory to download command files
-DOWNLOAD_DIR="/usr/bin"
+# Set Download Directory
+DOWNLOAD_DIR="/usr/local/bin"
 sudo mkdir -p "$DOWNLOAD_DIR"
 
-# Install crictl (required for kubeadm / Kubelet Container Runtime Interface (CRI)):
+# Install crictl
+echo "Installing crictl..."
 CRICTL_VERSION="v1.28.0"
-ARCH="amd64"
 curl -L "https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz" | sudo tar -C $DOWNLOAD_DIR -xz
 
-# Install kubeadm, kubelet, kubectl (Version 1.28):
-# RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
-RELEASE="v1.28.2"
-ARCH="amd64"
+# Install kubeadm, kubelet, kubectl
+echo "Installing kubeadm, kubelet, and kubectl..."
+RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
 cd $DOWNLOAD_DIR
-sudo curl -L --remote-name-all https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubelet}
-sudo chmod +x {kubeadm,kubelet}
+sudo curl -L --remote-name-all https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubelet,kubectl}
+sudo chmod +x {kubeadm,kubelet,kubectl}
 
+# Setup kubelet systemd service
 RELEASE_VERSION="v0.16.2"
 curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service
 sudo mkdir -p /etc/systemd/system/kubelet.service.d
 curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
 # Enable and start kubelet
-sudo systemctl enable --now kubelet
+systemctl enable --now kubelet
+
+# Configuring a cgroup driver
+# Note: Ensure that the container runtime and kubelet cgroup drivers match.
+# This part of the script might need to be adjusted based on the specific runtime and system configuration.
+echo "Configuring cgroup driver..."
+# Example configurations can be added here
+
+echo "Kubernetes installation script execution completed."
+
 
 # Load br_netfilter module and apply sysctl settings for Kubernetes networking
 sudo modprobe br_netfilter
