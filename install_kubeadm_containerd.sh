@@ -99,7 +99,8 @@ ARCH="amd64"
 curl -L "https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz" | sudo tar -C $DOWNLOAD_DIR -xz
 
 # Install kubeadm, kubelet, kubectl (Version 1.28):
-RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
+# RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
+RELEASE="v1.28.2"
 ARCH="amd64"
 cd $DOWNLOAD_DIR
 sudo curl -L --remote-name-all https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubelet}
