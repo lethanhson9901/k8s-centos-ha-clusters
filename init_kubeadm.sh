@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Default values
-DEFAULT_CLUSTER_VIP="192.168.56.134"  # Default cluster VIP
-DEFAULT_NODE_IP="192.168.56.134"      # Default node IP
+DEFAULT_CLUSTER_VIP="10.16.150.140"  # Default cluster VIP
+DEFAULT_NODE_IP="10.16.150.138"      # Default node IP
 DEFAULT_POD_NETWORK_CIDR="192.168.0.0/16"  # Default pod network CIDR
 
 # Parse command-line arguments
