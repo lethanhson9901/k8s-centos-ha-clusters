@@ -18,6 +18,18 @@ CLUSTER_VIP=$(yq e '.cluster_vip' "$CONFIG_FILE")
 MASTER_NODES=($(yq e '.master_nodes[]' "$CONFIG_FILE"))
 WORKER_NODES=($(yq e '.worker_nodes[]' "$CONFIG_FILE"))
 
+# Install psmisc
+echo "Installing psmisc..."
+yum install -y psmisc --enablerepo=extras
+
+# Install haproxy
+echo "Installing haproxy..."
+yum install -y haproxy
+
+# Create haproxy conf empty file
+echo "Creating empty haproxy configuration file..."
+touch /etc/haproxy/haproxy.cfg
+
 # Function to generate HAProxy backend configuration
 generate_haproxy_backend() {
     local backend_name=$1
@@ -39,7 +51,7 @@ generate_haproxy_backend() {
 
 # Configure HAProxy
 echo "Configuring HAProxy..."
-sudo bash -c "cat <<EOF > /etc/haproxy/haproxy.cfg
+bash -c "cat <<EOF > /etc/haproxy/haproxy.cfg
 frontend kube_apiserver_frontend
   bind *:6443
   mode tcp
@@ -71,12 +83,20 @@ EOF"
 
 # Restart HAProxy
 echo "Restarting HAProxy..."
-sudo systemctl restart haproxy
-sudo systemctl enable haproxy
+systemctl restart haproxy
+systemctl enable haproxy
+
+# Install keepalived
+echo "Installing keepalived..."
+yum install -y keepalived
+
+# Create keepalived.conf empty file
+echo "Creating empty keepalived configuration file..."
+touch /etc/keepalived/keepalived.conf
 
 # Configure Keepalived
 echo "Configuring Keepalived..."
-sudo bash -c "cat <<EOF > /etc/keepalived/keepalived.conf
+bash -c "cat <<EOF > /etc/keepalived/keepalived.conf
 vrrp_script check_apiserver {
   script "killall -0 haproxy"
   interval 3
@@ -104,7 +124,7 @@ EOF"
 
 # Restart Keepalived
 echo "Restarting Keepalived..."
-sudo systemctl restart keepalived
-sudo systemctl enable keepalived
+systemctl restart keepalived
+systemctl enable keepalived
 
 echo "Configuration completed."
