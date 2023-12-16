@@ -139,7 +139,7 @@ vrrp_script check_apiserver {
 
 vrrp_instance VI_1 {
     state MASTER
-    interface eth1
+    interface eth0
     virtual_router_id 201
     priority 200
     advert_int 1
