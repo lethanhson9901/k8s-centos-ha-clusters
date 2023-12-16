@@ -3,7 +3,7 @@
 # Bash script to install yq on CentOS
 
 # Define the yq version to install
-YQ_VERSION="4.x.x" # Replace with the desired version
+YQ_VERSION="4.2.0" # Replace with the desired version
 
 # Download yq binary from GitHub releases
 echo "Downloading yq version $YQ_VERSION..."
