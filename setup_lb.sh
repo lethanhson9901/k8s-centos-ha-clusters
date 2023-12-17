@@ -33,6 +33,7 @@ cat <<EOF > /etc/hosts
 10.16.150.132      k8s-lb-1
 10.16.150.133      k8s-lb-2
 10.16.150.137      vip
+127.0.0.1       localhost
 EOF
 
 # Check if the config file exists
