@@ -123,7 +123,7 @@ Following these steps will ensure the successful installation of Flannel as your
    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
    sudo chown $(id -u):$(id -g) $HOME/.kube/config
    ```
-3. Incase token is expired or you forgot:
+3. (Optional) Incase token is expired or you forgot:
     **Recreate Token if Needed**:
    ```bash
    kubeadm token create --print-join-command
