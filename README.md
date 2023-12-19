@@ -86,6 +86,7 @@ After the first master node initialization, the next crucial step is to install 
 - **Apply Flannel Configuration**: Download and apply the Flannel configuration to your Kubernetes cluster.
   ```bash
   kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+  systemctl restart containerd
   ```
 - **Check Installation**: Confirm the deployment of Flannel.
   ```bash
