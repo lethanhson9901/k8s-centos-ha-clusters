@@ -141,7 +141,7 @@ Following these steps will ensure the successful installation of Flannel as your
 #### Steps:
 1. **Use `kubeadm join` command** for worker nodes (similar to master nodes but without `--control-plane` and `--certificate-key` flags):
    ```bash
-   kubeadm join new-loadbalancer:6443 --token <token> \
+   kubeadm join <cluster-vip-ip>:6443 --token <token> \
     --discovery-token-ca-cert-hash sha256:<hash>
    ```
 
