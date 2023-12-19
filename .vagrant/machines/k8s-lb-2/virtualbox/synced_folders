@@ -1,1 +1,0 @@
-{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"/home/son/Downloads/mobifone/son/k8s-centos-ha-clusters","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}}}
