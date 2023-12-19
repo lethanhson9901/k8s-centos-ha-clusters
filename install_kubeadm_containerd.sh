@@ -11,7 +11,7 @@ case $MY_IP in
     10.16.150.136) hostnamectl set-hostname k8s-worker-3 ;;
     10.16.150.132) hostnamectl set-hostname k8s-lb-1 ;;
     10.16.150.133) hostnamectl set-hostname k8s-lb-2 ;;
-    10.16.150.137) hostnamectl set-hostname vip ;;
+    10.16.150.252) hostnamectl set-hostname vip ;;
     *) echo "IP address not recognized. Hostname not changed." ;;
 esac
 
@@ -25,7 +25,7 @@ cat <<EOF > /etc/hosts
 10.16.150.136      k8s-worker-3
 10.16.150.132      k8s-lb-1
 10.16.150.133      k8s-lb-2
-10.16.150.137      vip
+10.16.150.252      vip
 127.0.0.1       localhost
 EOF
 
