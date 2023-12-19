@@ -17,6 +17,7 @@ This guide details the process for setting up a high-availability Kubernetes clu
    cd k8s-centos-ha-clusters
    sudo su
    chmod +x ./* # Grant execution access to shell scripts
+   ./install_vq.sh #install vq to read yml file
    ```
 
 ## Setting Up Load Balancers
