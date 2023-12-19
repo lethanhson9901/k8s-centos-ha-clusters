@@ -94,7 +94,7 @@ After the first master node initialization, the next crucial step is to install 
   Look for `kube-flannel-ds` pods in the `Running` state.
 
 2. Verify Node Network
-- Ensure each node is ready and communicating correctly:
+- Ensure each node is `ready`` and communicating correctly:
   ```bash
   kubectl get nodes
   ```
