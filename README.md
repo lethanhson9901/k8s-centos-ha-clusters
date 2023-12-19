@@ -106,3 +106,52 @@ After the first master node initialization, the next crucial step is to install 
 - **Alternatives**: If you prefer a different CNI, use the respective configuration file URL for installation.
 
 Following these steps will ensure the successful installation of Flannel as your Kubernetes cluster's CNI, enabling seamless pod-to-pod networking.
+
+## Join Other Master Nodes
+
+#### Steps:
+1. **Use the `kubeadm join` command** from the initial master node's output. Replace the tokens and addresses with your specific details. Example:
+   ```bash
+   kubeadm join <cluster-vip-ip>:6443 --token <token> \
+    --discovery-token-ca-cert-hash sha256:<hash> \
+    --control-plane --certificate-key <certificate-key> --apiserver-advertise-address <master-ip>
+   ```
+
+2. **Set up kubeconfig** (Repeat on each master node):
+   ```bash
+   mkdir -p $HOME/.kube
+   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+   sudo chown $(id -u):$(id -g) $HOME/.kube/config
+   ```
+3. Incase token is expired or you forgot:
+    **Recreate Token if Needed**:
+   ```bash
+   kubeadm token create --print-join-command
+   ```
+
+    **Get Discovery Token CA Cert Hash** (Needed for joining nodes):
+   ```bash
+   openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | \
+   openssl rsa -pubin -outform der 2>/dev/null | \
+   openssl dgst -sha256 -hex | sed 's/^.* //’
+   ```
+
+## Join Worker Nodes
+
+#### Steps:
+1. **Use `kubeadm join` command** for worker nodes (similar to master nodes but without `--control-plane` and `--certificate-key` flags):
+   ```bash
+   kubeadm join new-loadbalancer:6443 --token <token> \
+    --discovery-token-ca-cert-hash sha256:<hash>
+   ```
+
+### Verifying the Cluster
+
+- **Run the following commands** to verify the cluster setup:
+  ```bash
+  kubectl cluster-info
+  kubectl get nodes
+  kubectl get cs
+  ```
+
+Enjoy your Kubernetes Cluster!
