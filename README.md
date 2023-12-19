@@ -199,8 +199,8 @@ kubectl get svc my-nginx
 kubectl apply -f my-nginx-ingress.yaml
 ```
 
-Open on browser [http://172.16.0.16.nip.io](http://172.16.0.16.nip.io), or
+Open on browser [http://10.16.150.252.nip.io](http://10.16.150.252.nip.io), or
 ```shell
-open http://172.16.0.16.nip.io
+open http://10.16.150.252.nip.io
 ```
 
