@@ -80,34 +80,48 @@ generate_haproxy_backend() {
 
 # Configure HAProxy
 echo "Configuring HAProxy..."
-bash -c "cat <<EOF > /etc/haproxy/haproxy.cfg
+bash -c "cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg
 frontend kube_apiserver_frontend
   bind *:6443
   mode tcp
   option tcplog
-  log global
   default_backend kube_apiserver_backend
 
-$(generate_haproxy_backend kube_apiserver_backend MASTER_NODES[@] tcp $MASTER_PORT)
+backend kube_apiserver_backend
+  option httpchk GET /healthz
+  http-check expect status 200
+  mode tcp
+  option ssl-hello-chk
+  balance roundrobin
+    server k8s-master-1 10.16.150.138:6443 check fall 3 rise 2
+    server k8s-master-2 10.16.150.139:6443 check fall 3 rise 2
+    server k8s-master-3 10.16.150.140:6443 check fall 3 rise 2
 
 frontend http_frontend
   bind *:80
   mode tcp
   option tcplog
-  log global
   default_backend http_backend
 
-$(generate_haproxy_backend http_backend WORKER_NODES[@] tcp $WORKER_HTTP_PORT)
+backend http_backend
+  mode tcp
+  balance roundrobin
+    server k8s-worker-1 10.16.150.134:30100 check send-proxy-v2
+    server k8s-worker-2 10.16.150.135:30100 check send-proxy-v2
+    server k8s-worker-3 10.16.150.136:30100 check send-proxy-v2
 
 frontend https_frontend
   bind *:443
   mode tcp
   option tcplog
-  log global
   default_backend https_backend
 
-$(generate_haproxy_backend https_backend WORKER_NODES[@] tcp $WORKER_HTTPS_PORT)
-
+backend https_backend
+  mode tcp
+  balance roundrobin
+    server k8s-worker-1 10.16.150.134:30101 check send-proxy-v2
+    server k8s-worker-2 10.16.150.135:30101 check send-proxy-v2
+    server k8s-worker-3 10.16.150.136:30101 check send-proxy-v2
 EOF"
 
 # Restart HAProxy
