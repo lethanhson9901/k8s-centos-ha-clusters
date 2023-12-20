@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Ensure the script is run as root
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
 # Set hostname based on IP address
 MY_IP=$(hostname -I | awk '{print $1}')
 case $MY_IP in
@@ -17,6 +22,9 @@ esac
 
 # Configure /etc/hosts
 cat <<EOF > /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
 10.16.150.138      k8s-master-1
 10.16.150.139      k8s-master-2
 10.16.150.140      k8s-master-3
@@ -26,11 +34,15 @@ cat <<EOF > /etc/hosts
 10.16.150.132      k8s-lb-1
 10.16.150.133      k8s-lb-2
 10.16.150.252      vip
-127.0.0.1       localhost
 EOF
 
-# Update all packages
-yum update -y
+# Set DNS nameserver
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
+
+# Update CentOS 7 repos to Tsinghua University's mirror
+sudo sed -i.bak -e 's|^mirrorlist=|#mirrorlist=|g' \
+         -e 's|^#baseurl=http://mirror.centos.org/centos|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos|g' \
+         /etc/yum.repos.d/CentOS-*.repo
 
 # Disable swap
 swapoff -a
@@ -53,8 +65,10 @@ EOF
 # Apply sysctl settings without reboot
 sysctl --system
 
-# Install yum-utils and add Docker repository
-yum install -y yum-utils device-mapper-persistent-data lvm2
+# 对于 CentOS 7
+yum update -y && yum -y install  wget psmisc vim net-tools nfs-utils telnet yum-utils device-mapper-persistent-data lvm2 git tar curl
+
+# Add Docker repository
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum install containerd.io -y
 yum install -y docker-ce docker-ce-cli
@@ -62,6 +76,9 @@ yum install -y docker-ce docker-ce-cli
 # Start and enable Docker
 systemctl start docker
 systemctl enable docker
+
+# Turn off the firewall
+systemctl disable --now firewalld
 
 # Create Docker configuration directory and set permissions
 mkdir -p /etc/docker
@@ -87,6 +104,23 @@ chown root:root /etc/docker/daemon.json
 systemctl daemon-reload
 systemctl restart docker
 
+# Time synchronization
+yum install -y ntp
+# Start and enable NTP service
+systemctl start ntpd
+systemctl enable ntpd
+# Ensure time synchronization
+ntpq -p
+
+# ulimit -SHn 65535
+# cat >> /etc/security/limits.conf <<EOF
+# * soft nofile 655360
+# * hard nofile 131072
+# * soft nproc 655350
+# * hard nproc 655350
+# * seft memlock unlimited
+# * hard memlock unlimitedd
+# EOF
 
 # Define Containerd config path
 containerd_config_path="/etc/containerd/config.toml"
@@ -101,13 +135,14 @@ fi
 echo "Creating default Containerd config file..."
 containerd config default > "$containerd_config_path"
 
-# Set SystemdCgroup to true in Containerd config
+# Update SystemdCgroup setting to true
 echo "Setting SystemdCgroup to true in Containerd config..."
-sed -i '/^SystemdCgroup = false/c\SystemdCgroup = true' "$containerd_config_path"
+sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' "$containerd_config_path"
 
-echo "Configuration complete."
+echo "Containerd configuration update complete."
 
 # Enable and restart containerd
+systemctl daemon-reload
 systemctl enable containerd
 systemctl restart containerd
 

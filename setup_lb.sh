@@ -24,6 +24,9 @@ esac
 
 # Configure /etc/hosts
 cat <<EOF > /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
 10.16.150.138      k8s-master-1
 10.16.150.139      k8s-master-2
 10.16.150.140      k8s-master-3
@@ -33,7 +36,6 @@ cat <<EOF > /etc/hosts
 10.16.150.132      k8s-lb-1
 10.16.150.133      k8s-lb-2
 10.16.150.252      vip
-127.0.0.1       localhost
 EOF
 
 # Check if the config file exists
