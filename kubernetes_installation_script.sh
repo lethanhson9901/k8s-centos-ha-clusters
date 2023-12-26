@@ -11,11 +11,11 @@
 # View the current list of network cards and UUIDs:
 # nmcli con show
 # Delete the network connection to change the UUID:
-# nmcli con delete uuid <原 UUID>
+# nmcli con delete uuid <original UUID>
 # Regenerate the UUID:
-# nmcli con add type ethernet ifname <接口名称> con-name <新名称>
+# nmcli con add type ethernet ifname <interface name> con-name <new name>
 # Re-enable the network connection:
-# nmcli con up <新名称>
+# nmcli con up <new name>
 
 # Change the network card's UUID
 ssh root@192.168.1.31 "nmcli con delete uuid 708a1497-2192-43a5-9f03-2ab936fb3c44;nmcli con add type ethernet ifname eth0 con-name eth0;nmcli con up eth0"
