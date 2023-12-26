@@ -24,23 +24,23 @@ ssh root@192.168.1.33 "nmcli con delete uuid 708a1497-2192-43a5-9f03-2ab936fb3c4
 ssh root@192.168.1.34 "nmcli con delete uuid 708a1497-2192-43a5-9f03-2ab936fb3c44;nmcli con add type ethernet ifname eth0 con-name eth0;nmcli con up eth0"
 ssh root@192.168.1.35 "nmcli con delete uuid 708a1497-2192-43a5-9f03-2ab936fb3c44;nmcli con add type ethernet ifname eth0 con-name eth0;nmcli con up eth0"
 
-# 参数解释
+# Explanation of parameters
 # 
 # ssh ssh root@192.168.1.31
-# 使用SSH登录到IP为192.168.1.31的主机，使用root用户身份。
+# Log in to the host with IP 192.168.1.31 using SSH as the root user.
 # 
 # nmcli con delete uuid 708a1497-2192-43a5-9f03-2ab936fb3c44
-# 删除 UUID 为 708a1497-2192-43a5-9f03-2ab936fb3c44 的网络连接，这是 NetworkManager 中一种特定网络配置的唯一标识符。
+# Deletes a network connection with UUID 708a1497-2192-43a5-9f03-2ab936fb3c44, which is a unique identifier for a specific network configuration in NetworkManager.
 # 
 # nmcli con add type ethernet ifname eth0 con-name eth0
-# 添加一种以太网连接类型，并指定接口名为 eth0，连接名称也为 eth0。
+# Adds an Ethernet connection type, specifying the interface name as eth0 and the connection name also as eth0.
 # 
 # nmcli con up eth0
-# 开启 eth0 这个网络连接。
+# Enables the eth0 network connection.
 # 
-# 简单来说，这个命令的作用是删除一个特定的网络连接配置，并添加一个名为 eth0 的以太网连接，然后启用这个新的连接。
+# In short, this command sequence deletes a specific network connection configuration, adds an Ethernet connection named eth0, and then enables this new connection.
 
-# 修改静态的IPv4地址
+# Modify static IPv4 address
 ssh root@192.168.1.104 "nmcli con mod eth0 ipv4.addresses 192.168.1.31/24; nmcli con mod eth0 ipv4.gateway  192.168.1.1; nmcli con mod eth0 ipv4.method manual; nmcli con mod eth0 ipv4.dns "8.8.8.8"; nmcli con up eth0"
 ssh root@192.168.1.106 "nmcli con mod eth0 ipv4.addresses 192.168.1.32/24; nmcli con mod eth0 ipv4.gateway  192.168.1.1; nmcli con mod eth0 ipv4.method manual; nmcli con mod eth0 ipv4.dns "8.8.8.8"; nmcli con up eth0"
 ssh root@192.168.1.107 "nmcli con mod eth0 ipv4.addresses 192.168.1.33/24; nmcli con mod eth0 ipv4.gateway  192.168.1.1; nmcli con mod eth0 ipv4.method manual; nmcli con mod eth0 ipv4.dns "8.8.8.8"; nmcli con up eth0"
@@ -50,7 +50,7 @@ ssh root@192.168.1.110 "nmcli con mod eth0 ipv4.addresses 192.168.1.35/24; nmcli
 
 
 nmcli con mod eth0 ipv4.gateway 192.168.1.200; nmcli con mod eth0 ipv4.method manual; nmcli con mod eth0 ipv4.dns "223.5.5.5"; nmcli con up eth0
-# 参数解释
+# Explanation of parameters
 # 
 # ssh root@192.168.1.154
 # 使用SSH登录到IP为192.168.1.154的主机，使用root用户身份。
@@ -79,7 +79,7 @@ ssh root@192.168.1.33 "nmcli con mod eth0 ipv6.addresses fc00:43f4:1eea:1::30; n
 ssh root@192.168.1.34 "nmcli con mod eth0 ipv6.addresses fc00:43f4:1eea:1::40; nmcli con mod eth0 ipv6.gateway fc00:43f4:1eea:1::1; nmcli con mod eth0 ipv6.method manual; nmcli con mod eth0 ipv6.dns "2400:3200::1"; nmcli con up eth0"
 ssh root@192.168.1.35 "nmcli con mod eth0 ipv6.addresses fc00:43f4:1eea:1::50; nmcli con mod eth0 ipv6.gateway fc00:43f4:1eea:1::1; nmcli con mod eth0 ipv6.method manual; nmcli con mod eth0 ipv6.dns "2400:3200::1"; nmcli con up eth0"
 
-# 参数解释
+# Explanation of parameters
 # 
 # ssh root@192.168.1.31
 # 通过SSH连接到IP地址为192.168.1.31的远程主机，使用root用户进行登录。
@@ -129,7 +129,7 @@ DNS1=8.8.8.8
 
 
 
-# 参数解释
+# Explanation of parameters
 # 
 # TYPE=Ethernet
 # 指定连接类型为以太网。
@@ -204,7 +204,7 @@ hostnamectl set-hostname k8s-master03
 hostnamectl set-hostname k8s-node01
 hostnamectl set-hostname k8s-node02
 
-# 参数解释
+# Explanation of parameters
 # 
 # 参数: set-hostname
 # 解释: 这是hostnamectl命令的一个参数，用于设置系统的主机名。
@@ -234,7 +234,7 @@ sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 # 对于私有仓库
 sed -e 's|^mirrorlist=|#mirrorlist=|g' -e 's|^#baseurl=http://mirror.centos.org/\$contentdir|baseurl=http://192.168.1.123/centos|g' -i.bak  /etc/yum.repos.d/CentOS-*.repo
 
-# 参数解释
+# Explanation of parameters
 # 
 # 以上命令是用于更改系统软件源的配置，以便从国内镜像站点下载软件包和更新。
 # 
@@ -498,7 +498,7 @@ systemctl disable --now firewalld
 setenforce 0
 sed -i 's#SELINUX=enforcing#SELINUX=disabled#g' /etc/selinux/config
 
-# 参数解释
+# Explanation of parameters
 # 
 # setenforce 0
 # 此命令用于设置 SELinux 的执行模式。0 表示关闭 SELinux。
@@ -514,7 +514,7 @@ cat /etc/fstab
 # /dev/mapper/centos-swap swap                    swap    defaults        0 0
 
 
-# 参数解释：
+# Explanation of parameters：
 # 
 # -ri: 这个参数用于在原文件中替换匹配的模式。-r表示扩展正则表达式，-i允许直接修改文件。
 # 's/.*swap.*/#&/': 这是一个sed命令，用于在文件/etc/fstab中找到包含swap的行，并在行首添加#来注释掉该行。
@@ -536,7 +536,7 @@ unmanaged-devices=interface-name:cali*;interface-name:tunl*
 EOF
 systemctl restart NetworkManager
 
-# 参数解释
+# Explanation of parameters
 #
 # 这个参数用于指定不由 NetworkManager 管理的设备。它由以下两个部分组成
 # 
@@ -584,7 +584,7 @@ systemctl restart chronyd ; systemctl enable chronyd
 #使用客户端进行验证
 chronyc sources -v
 
-# 参数解释
+# Explanation of parameters
 #
 # pool ntp.aliyun.com iburst
 # 指定使用ntp.aliyun.com作为时间服务器池，iburst选项表示在初始同步时会发送多个请求以加快同步速度。
@@ -624,7 +624,7 @@ cat >> /etc/security/limits.conf <<EOF
 * hard memlock unlimitedd
 EOF
 
-# 参数解释
+# Explanation of parameters
 #
 # soft nofile 655360
 # soft表示软限制，nofile表示一个进程可打开的最大文件数，默认值为1024。这里的软限制设置为655360，即一个进程可打开的最大文件数为655360。
@@ -752,7 +752,7 @@ nf_defrag_ipv6         24576  2 nf_conntrack,ip_vs
 nf_defrag_ipv4         16384  1 nf_conntrack
 libcrc32c              16384  3 nf_conntrack,xfs,ip_vs
 
-# 参数解释
+# Explanation of parameters
 #
 # ip_vs
 # IPVS 是 Linux 内核中的一个模块，用于实现负载均衡和高可用性。它通过在前端代理服务器上分发传入请求到后端实际服务器上，提供了高性能和可扩展的网络服务。
@@ -957,7 +957,7 @@ WantedBy=multi-user.target
 EOF
 
 
-# 参数解释：
+# Explanation of parameters：
 #
 # 这是一个用于启动containerd容器运行时的systemd unit文件。下面是对该文件不同部分的详细解释：
 # 
@@ -1018,7 +1018,7 @@ overlay
 br_netfilter
 EOF
 
-# 参数解释：
+# Explanation of parameters：
 #
 # containerd是一个容器运行时，用于管理和运行容器。它支持多种不同的参数配置来自定义容器运行时的行为和功能。
 # 
@@ -1031,7 +1031,7 @@ EOF
 # Command block 23
 systemctl restart systemd-modules-load.service
 
-# 参数解释：
+# Explanation of parameters：
 # - `systemctl`: 是Linux系统管理服务的命令行工具，可以管理systemd init系统。
 # - `restart`: 是systemctl命令的一个选项，用于重新启动服务。
 # - `systemd-modules-load.service`: 是一个系统服务，用于加载内核模块。
@@ -1049,7 +1049,7 @@ EOF
 # 加载内核
 sysctl --system
 
-# 参数解释：
+# Explanation of parameters：
 # 
 # 这些参数是Linux操作系统中用于网络和网络桥接设置的参数。
 # 
@@ -1062,7 +1062,7 @@ sysctl --system
 # 这些参数的值可以通过修改操作系统的配置文件（通常是'/etc/sysctl.conf'）来进行设置。修改完成后，需要使用'sysctl -p'命令重载配置文件使参数生效。
 
 # Command block 25
-# 参数解释：
+# Explanation of parameters：
 # 
 # 这段代码是用于修改并配置containerd的参数。
 # 
@@ -1198,7 +1198,7 @@ OOMScoreAdjust=-999
 WantedBy=multi-user.target
 EOF
 
-# 参数解释：
+# Explanation of parameters：
 # 
 # [Unit]
 # - Description=containerd container runtime：指定服务的描述信息。
@@ -1257,7 +1257,7 @@ OOMScoreAdjust=-500
 WantedBy=multi-user.target
 EOF
 
-# 参数解释：
+# Explanation of parameters：
 # 
 # [Unit]
 # - Description: 描述服务的作用，这里是Docker Application Container Engine，即Docker应用容器引擎。
