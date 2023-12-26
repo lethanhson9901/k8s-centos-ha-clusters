@@ -3,21 +3,21 @@
 # Script generated from the Kubernetes installation guide
 
 # Command block 1
-# 注意！
-# 若虚拟机是进行克隆的那么网卡的UUID会重复
-# 若UUID重复需要重新生成新的UUID
-# UUID重复无法获取到IPV6地址
+# Attention!
+# If the virtual machine is cloned, then the network card's UUID will be duplicated
+# If the UUID is duplicated, a new UUID needs to be regenerated
+# Duplicated UUIDs cannot obtain an IPV6 address
 # 
-# 查看当前的网卡列表和 UUID：
+# View the current list of network cards and UUIDs:
 # nmcli con show
-# 删除要更改 UUID 的网络连接：
+# Delete the network connection to change the UUID:
 # nmcli con delete uuid <原 UUID>
-# 重新生成 UUID：
+# Regenerate the UUID:
 # nmcli con add type ethernet ifname <接口名称> con-name <新名称>
-# 重新启用网络连接：
+# Re-enable the network connection:
 # nmcli con up <新名称>
 
-# 更改网卡的UUID
+# Change the network card's UUID
 ssh root@192.168.1.31 "nmcli con delete uuid 708a1497-2192-43a5-9f03-2ab936fb3c44;nmcli con add type ethernet ifname eth0 con-name eth0;nmcli con up eth0"
 ssh root@192.168.1.32 "nmcli con delete uuid 708a1497-2192-43a5-9f03-2ab936fb3c44;nmcli con add type ethernet ifname eth0 con-name eth0;nmcli con up eth0"
 ssh root@192.168.1.33 "nmcli con delete uuid 708a1497-2192-43a5-9f03-2ab936fb3c44;nmcli con add type ethernet ifname eth0 con-name eth0;nmcli con up eth0"
@@ -1098,7 +1098,7 @@ server = "https://docker.io"
   capabilities = ["pull", "resolve"]
 EOF
 
-# 注意！
+# Attention!
 # SystemdCgroup参数是containerd中的一个配置参数，用于设置containerd在运行过程中使用的Cgroup（控制组）路径。Containerd使用SystemdCgroup参数来指定应该使用哪个Cgroup来跟踪和管理容器的资源使用。
 # 
 # Cgroup是Linux内核提供的一种资源隔离和管理机制，可以用于限制、分配和监控进程组的资源使用。使用Cgroup，可以将容器的资源限制和隔离，以防止容器之间的资源争用和不公平的竞争。
@@ -1144,7 +1144,7 @@ EOF
 systemctl restart  containerd
 crictl info
 
-# 注意！
+# Attention!
 # 下面是参数`crictl`的详细解释
 # 
 # `crictl`是一个用于与容器运行时通信的命令行工具。它是容器运行时接口（CRI）工具的一个实现，可以对容器运行时进行管理和操作。
