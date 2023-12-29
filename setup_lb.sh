@@ -10,9 +10,8 @@ WORKER_HTTPS_PORT="30101"
 # Set hostname based on IP address
 MY_IP=$(hostname -I | awk '{print $1}')
 case $MY_IP in
-    10.16.150.138) hostnamectl set-hostname k8s-master-1 ;;
-    10.16.150.139) hostnamectl set-hostname k8s-master-2 ;;
-    10.16.150.140) hostnamectl set-hostname k8s-master-3 ;;
+    10.16.150.137) hostnamectl set-hostname k8s-master-1 ;;
+    10.16.150.140) hostnamectl set-hostname k8s-master-2 ;;
     10.16.150.134) hostnamectl set-hostname k8s-worker-1 ;;
     10.16.150.135) hostnamectl set-hostname k8s-worker-2 ;;
     10.16.150.136) hostnamectl set-hostname k8s-worker-3 ;;
@@ -27,9 +26,8 @@ cat <<EOF > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
-10.16.150.138      k8s-master-1
-10.16.150.139      k8s-master-2
-10.16.150.140      k8s-master-3
+10.16.150.137      k8s-master-1
+10.16.150.140      k8s-master-2
 10.16.150.134      k8s-worker-1
 10.16.150.135      k8s-worker-2
 10.16.150.136      k8s-worker-3
@@ -95,10 +93,9 @@ backend kube_apiserver_backend
   mode tcp
   option ssl-hello-chk
   balance roundrobin
-    server k8s-master-1 10.16.150.138:6443 check fall 3 rise 2
-    server k8s-master-2 10.16.150.139:6443 check fall 3 rise 2
-    server k8s-master-3 10.16.150.140:6443 check fall 3 rise 2
-
+    server k8s-master-1 10.16.150.137:6443 check fall 3 rise 2
+    server k8s-master-2 10.16.150.140:6443 check fall 3 rise 2
+  
 frontend http_frontend
   bind *:80
   mode tcp
