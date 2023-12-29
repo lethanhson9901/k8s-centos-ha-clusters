@@ -128,13 +128,13 @@ Following these steps will ensure the successful installation of Flannel as your
     **Recreate Token if Needed**:
    ```bash
    kubeadm token create --print-join-command
+   kubeadm init phase upload-certs --upload-certs
    ```
 
-    **Get Discovery Token CA Cert Hash** (Needed for joining nodes):
-   ```bash
-   openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | \
-   openssl rsa -pubin -outform der 2>/dev/null | \
-   openssl dgst -sha256 -hex | sed 's/^.* //’
+4. **In case errors**: reset kubeadm
+   ```
+   kubeadm reset -f
+   rm -rf /etc/cni/net.d /etc/kubernetes/manifests /var/lib/etcd .kube
    ```
 
 ## Join Worker Nodes
