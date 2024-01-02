@@ -8,7 +8,7 @@ fi
 # Set hostname based on IP address
 MY_IP=$(hostname -I | awk '{print $1}')
 case $MY_IP in
-    10.16.150.137) hostnamectl set-hostname k8s-master-1 ;;
+    10.16.150.139) hostnamectl set-hostname k8s-master-1 ;;
     10.16.150.140) hostnamectl set-hostname k8s-master-2 ;;
     10.16.150.134) hostnamectl set-hostname k8s-worker-1 ;;
     10.16.150.135) hostnamectl set-hostname k8s-worker-2 ;;
@@ -24,7 +24,7 @@ cat <<EOF > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
-10.16.150.137      k8s-master-1
+10.16.150.139      k8s-master-1
 10.16.150.140      k8s-master-2
 10.16.150.134      k8s-worker-1
 10.16.150.135      k8s-worker-2
