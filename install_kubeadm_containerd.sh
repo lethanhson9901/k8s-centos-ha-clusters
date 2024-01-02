@@ -105,6 +105,9 @@ systemctl restart docker
 # Time synchronization
 yum install -y ntp
 # Start and enable NTP service
+chkconfig ntpd on
+ntpdate pool.ntp.org
+service ntpd start
 systemctl start ntpd
 systemctl enable ntpd
 # Ensure time synchronization
