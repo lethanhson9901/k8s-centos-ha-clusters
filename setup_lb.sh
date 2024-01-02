@@ -93,7 +93,7 @@ backend kube_apiserver_backend
   mode tcp
   option ssl-hello-chk
   balance roundrobin
-    server k8s-master-1 10.16.150.137:6443 check fall 3 rise 2
+    server k8s-master-1 10.16.150.139:6443 check fall 3 rise 2
     server k8s-master-2 10.16.150.140:6443 check fall 3 rise 2
   
 frontend http_frontend
