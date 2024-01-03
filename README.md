@@ -160,7 +160,7 @@ Enjoy your Kubernetes Cluster!
 
 ## Additional Resources
 ### Storage Plug-in
-- [NFS File Storage](son_namespace/mfs-server/README.md)
+- [NFS File Storage](son_namespace/nfs-server/README.md)
 
 ### Basic Application
 - [NGINX Ingress Controller Setup Guide](son_namespace/nginx-ingress/README.md)
