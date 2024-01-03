@@ -157,3 +157,7 @@ Following these steps will ensure the successful installation of Flannel as your
 
 Enjoy your Kubernetes Cluster!
 
+
+## Additional Resources
+### Basic Application
+- [NGINX Ingress Controller Setup Guide](son_namespace/README.md)
