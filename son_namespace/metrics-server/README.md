@@ -2,6 +2,13 @@
 
 This guide will walk you through the installation of the Kubernetes Metrics Server, which is essential for gathering and displaying cluster-wide resource utilization statistics. Follow the steps below to set up Metrics Server on your Kubernetes cluster.
 
+## Pre-built method
+```
+cd son_namespace/metrics-server
+kubectl apply -f components.yaml
+```
+
+## Step-by-step
 ### Step 1: Download Metrics Server Manifest
 
 The first step is to download the latest Metrics Server manifest file from the Kubernetes GitHub repository using the following `curl` command:
