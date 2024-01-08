@@ -10,4 +10,4 @@ spec:
     - ReadWriteMany
   nfs:
     path: "/data/mydata/"
-    server: "172.16.10.100"
+    server: "10.16.150.138"
