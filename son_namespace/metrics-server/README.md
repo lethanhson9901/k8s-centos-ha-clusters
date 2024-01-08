@@ -53,7 +53,7 @@ Now that you've configured the Metrics Server YAML file, deploy the Metrics Serv
 kubectl apply -f components.yaml
 ```
 
-### Step 4: Verify Metrics Server Deployment
+## Verify Metrics Server Deployment
 
 After deploying the Metrics Server, verify its status by checking the pods running in the `kube-system` namespace:
 
@@ -63,7 +63,7 @@ kubectl get pods -n kube-system
 
 The output should confirm that the metrics-server pod is up and running.
 
-### Step 5: Test Metrics Server Installation
+## Test Metrics Server Installation
 
 Finally, test the Metrics Server installation by running the following `kubectl` command to view resource utilization statistics for the nodes in your cluster:
 
