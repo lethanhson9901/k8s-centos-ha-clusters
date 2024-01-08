@@ -87,6 +87,7 @@ Perform these steps on a worker node (`worker1.xtl` with IP range `10.16.150.133
 
 3. **Deploy and Verify**:
     ```bash
+    kubectl apply -f 1-pv-nfs.yaml
     kubectl apply -f 2-pvc-nfs.yaml
     kubectl get pvc,pv -o wide
     ```
