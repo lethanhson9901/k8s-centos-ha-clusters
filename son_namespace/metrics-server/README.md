@@ -8,7 +8,7 @@ cd son_namespace/metrics-server
 kubectl apply -f components.yaml
 ```
 
-## Step-by-step
+## Step-by-step:
 ### Step 1: Download Metrics Server Manifest
 
 The first step is to download the latest Metrics Server manifest file from the Kubernetes GitHub repository using the following `curl` command:
