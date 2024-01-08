@@ -9,5 +9,5 @@ spec:
   accessModes:
     - ReadWriteMany
   nfs:
-    path: "/data/mydata/"
+    path: "/root/sonlt_namespace/delete"
     server: "10.16.150.138"
