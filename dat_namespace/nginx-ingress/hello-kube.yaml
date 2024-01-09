@@ -14,10 +14,12 @@ spec:
     spec:
       containers:
         - image: 080196/hello-kube
+        - image: harbor.demo.bigdata.com/demo/hello-kube
           name: hello-kube
           ports:
             - containerPort: 3000
-
+      imagePullSecrets:
+        - name: harbor-credentials
 ---
 apiVersion: v1
 kind: Service
