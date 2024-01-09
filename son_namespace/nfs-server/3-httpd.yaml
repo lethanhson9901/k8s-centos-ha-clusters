@@ -17,7 +17,7 @@ spec:
       volumes:
         - name: htdocs
           persistentVolumeClaim:
-            claimName: pvc1
+            claimName: pvc2
       containers:
         - name: app
           image: httpd
