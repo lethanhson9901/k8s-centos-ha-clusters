@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: room-deployment
+spec:
+  replicas: 3 # Number of replicas
+  selector:
+    matchLabels:
+      app: meeting-room
+  template:
+    metadata:
+      labels:
+        app: meeting-room
+    spec:
+      containers:
+        - name: meeting-rooom
+          image: meeting.v3/room:12122023_104046
+          ports:
+            - containerPort: 8000 # Your application's port
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: meeting-ui-service
+spec:
+  type: NodePort
+  selector:
+    app: meeting-room
+  ports:
+    - port: 3000 # Port accessible inside the cluster
+      targetPort: 3000 # Container port to forward to
+      nodePort: 30007 # Optional: Specific nodePort, otherwise Kubernetes will allocate one

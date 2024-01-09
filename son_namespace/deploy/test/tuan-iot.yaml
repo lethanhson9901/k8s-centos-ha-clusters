@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: gateway-integrate-dc
+  name: gateway-integrate-dc
+  namespace: aiot-dc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: gateway-integrate-dc
+  template:
+    metadata:
+      labels:
+        io.kompose.service: gateway-integrate-dc
+    spec:
+      containers:
+        - image: aiot/gateway-integrate:latest
+          name: gateway-integrate
+          ports:
+            - containerPort: 8006
+          env:
+            - name: INFLUX_ADDR
+              value: http://10.38.170.215:8086
+            - name: INFLUX_USERNAME
+              value: mainflux
+            - name: INFLUX_PASSWORD
+              value: mainflux
+            - name: INFLUX_DB
+              value: mainflux
+            - name: MQTT_BROKER
+              value: 10.38.170.215:1883
+            - name: VERNEMQ_ADDR
+              value: 10.38.170.215
+            - name: VERNEMQ_PORT
+              value: "8888"
+            - name: VERNEMQ_API_KEY
+              value: oSEWJLIeUVSCWuPGoKgvSxew7Eco935m
+            - name: AUTH_REDIS_ADDR
+              value: 10.38.170.215:6379
+            - name: AUTH_REDIS_PASSWORD
+              value:
+            - name: AUTH_REDIS_DB
+              value: "0"
+            - name: HTTP_SERVER_PORT
+              value: "8006"
+            - name: GIN_MODE
+              value: release
+            - name: MQTT_THING_ID
+              value: 69b13502-287f-48c6-a395-e7df9b141f63
+            - name: MQTT_THING_KEY
+              value: e6f24e3c-eba7-4c14-996e-1fda9ecc71e2
+            - name: MQTT_CHANNEL_ID
+              value: 8b929253-36d7-44bd-a1a7-0f7b0a22077f
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "200Mi"
+              cpu: "200m"
+      restartPolicy: Always
+      nodeSelector:
+        node-restriction.kubernetes.io/nodelocation: "aiotdc"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: gateway-integrate-dc
+  name: gateway-integrate-dc
+  namespace: aiot-dc
+spec:
+  type: NodePort
+  ports:
+    - name: "31806"
+      port: 8006
+      targetPort: 8006
+      nodePort: 31806
+  selector:
+    io.kompose.service: gateway-integrate-dc
