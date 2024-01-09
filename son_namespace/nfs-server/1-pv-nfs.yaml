@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: pv2
 spec:
-  storageClassName: myStorageClass
+  storageClassName: sonstorageclass
   capacity:
     storage: 5Gi
   accessModes:
